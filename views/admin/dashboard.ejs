@@ -1,0 +1,35 @@
+<% include('../layouts/header.ejs') %>
+
+<h1>Dashboard</h1>
+
+<table width="60%">
+    <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Mobile No</th>
+        <th>Image</th>
+        <th>Verified</th>
+    </tr>
+
+    <% 
+        if(users.length > 0){
+            for(let i=0;i<users.length;i++){
+                %>
+                <tr>
+                    <td><%= users[i].name %></td>
+                </tr>
+                <%
+            }    
+        }else{
+            %>
+            <tr>
+                <td colspan="5">Users not found</td>
+            </tr>
+            <%
+        }
+    %>
+</table>
+<br><br>
+<a href="/admin/home">Go to Home</a>
+
+<% include('../layouts/footer.ejs') %>
