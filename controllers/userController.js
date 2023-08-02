@@ -148,7 +148,7 @@ const verifyMail = async(req,res)=>{
 // login user methods statred
 
 const loginLoad  = async(req,res)=>{
-
+    console.log("At Login page: "+req.session.user_id);
     try{
 
         res.render('login');
@@ -175,7 +175,9 @@ const verifyLogin = async(req,res)=>{
                 }
                 else{
                     req.session.user_id = userData._id;
+                    req.session.is_admin  = userData.is_admin;
                     res.redirect('/home')
+                    console.log("Session created: "+req.session.user_id)
                 }
 
             }
@@ -206,9 +208,10 @@ const loadHome = async(req,res)=>{
 }
 
 const userLogout = async(req,res)=>{
+    console.log("Entering userLogout function");
 
     try{
-        req.session.destroy();
+        req.session.destroy(); 
         res.redirect('/');
 
     }catch(error){

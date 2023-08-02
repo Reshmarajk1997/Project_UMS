@@ -8,12 +8,18 @@ user_route.use(session({secret:config.sessionSecret}));
 
 const auth = require('../middleware/auth');
 
+
 user_route.set('view engine','ejs');
 user_route.set('views','./views/users')
 
 const bodyParser = require('body-parser');
 user_route.use(bodyParser.json());
 user_route.use(bodyParser.urlencoded({extended:true}))
+
+user_route.use((req, res, next) => {
+    res.header('Cache-Control', 'no-store');
+    next();
+  });
 
 const path = require('path');
 

@@ -56,6 +56,7 @@ const sendResetPasswordMail = async(name,email,token)=>{
 const loadLogin = async(req,res)=>{
 
     try{
+        
         res.render('login');
 
     }catch(error){
@@ -81,6 +82,7 @@ const verifyLogin = async(req,res)=>{
                     res.render('login',{message:"Email and Password are incorrect..."})
                 }else{
                     req.session.user_id = userData._id;
+                    req.session.is_admin  = userData.is_admin;
                     res.redirect('/admin/home');
 
                 }
@@ -114,6 +116,7 @@ const logout = async(req,res)=>{
     try{
 
         req.session.destroy();
+        
         res.redirect('/admin');
 
     }catch(error){
@@ -195,9 +198,10 @@ const adminDashboard = async(req,res)=>{
 
     try {
 
-        const userData = await User.findOne({is_admin:0})
+        const userData = await User.find({is_admin:0})
 
         res.render('dashboard',{users:userData});
+        
         
     } catch (error) {
         console.log(error.message);
