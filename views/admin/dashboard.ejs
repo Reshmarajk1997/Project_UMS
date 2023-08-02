@@ -1,6 +1,7 @@
 <% include('../layouts/header.ejs') %>
-
 <h1>Dashboard</h1>
+
+<a href="/admin/new-user">Add New User</a>
 
 <table width="50%">
     <tr>
@@ -9,6 +10,7 @@
         <th>Mobile No</th>
         <th>Image</th>
         <th>Verified</th>
+        <th>Action</th>
     </tr>
 
     
@@ -19,6 +21,25 @@
                 %>
                 <tr>
                     <td><%= users[i].name %></td>
+                    <td><%= users[i].email %></td>
+                    <td><%= users[i].mobile %></td>
+                    <td><img src="/userImages/<%= users[i].image %>" alt="<%= users[i].image %>" width="100px" height="100px"></td>
+                    <td><% 
+                        if(users[i].is_verified == 0){
+                            %>
+                            <p>Not verified</p>
+                            <%
+                        }
+                        else{
+                            %>
+                            <p>Verified</p>
+                            <%
+                        }
+                        %></td>
+                        <td>
+                            <a href="/admin/edit-user?id=<%= users[i]._id %>">Edit</a>
+                            <a href="/admin/delete-user?id=<%= users[i]._id %>">Delete</a>
+                        </td>
                 </tr>
                 <%
             }    
