@@ -3,7 +3,11 @@ const bcrypt = require('bcrypt');
 const nodemailer = require('nodemailer');
 const randomstring = require('randomstring');
 const config = require('../config/config');
-
+const exceljs = require('exceljs');
+const ejs = require('ejs');
+const pdf = require('html-pdf');
+const path = require('path');
+const fs = require('fs');
 
 const securePassword = async(password)=>{
     try{
@@ -238,9 +242,46 @@ const adminDashboard = async(req,res)=>{
 
     try {
 
-        const userData = await User.find({is_admin:0})
+        var search = "";
+        if(req.query.search){
+            search = req.query.search;
+        }
 
-        res.render('dashboard',{users:userData});
+        var page = 1;
+        if(req.query.page){
+            page = req.query.page;
+        }
+
+        const limit = 2;
+
+        const userData = await User.find({
+            is_admin:0,
+            $or:[ 
+                {name:{$regex: '.*'+search+'.*',$options:'i'}},
+                {email:{$regex: '.*'+search+'.*',$options:'i'}},
+                {mobile:{$regex: '.*'+search+'.*',$options:'i'}}
+        ]
+                    
+        }).limit(limit * 1)
+        .skip((page-1)*limit)
+        .exec();
+
+        const count = await User.find({
+            is_admin:0,
+            $or:[ 
+                {name:{$regex: '.*'+search+'.*',$options:'i'}},
+                {email:{$regex: '.*'+search+'.*',$options:'i'}},
+                {mobile:{$regex: '.*'+search+'.*',$options:'i'}}
+        ]
+                    
+        }).countDocuments();
+
+
+        res.render('dashboard',{
+            users:userData,
+            totalPages:Math.ceil(count/limit),
+            currentPage:page
+        });
         
         
     } catch (error) {
@@ -336,6 +377,88 @@ const deleteUser = async(req,res)=>{
     }
 }
 
+const exportUsers = async(req,res)=>{
+    try {
+
+        const workbook = new exceljs.Workbook();
+        const worksheet = workbook.addWorksheet("My Users");
+
+        worksheet.columns = [
+            {header:"S No", key:"s_no"},
+            {header:"Name", key:"name"},
+            {header:"Email Id", key:"email"},
+            {header:"Mobile No", key:"mobile"},
+            {header:"Image", key:"image"},
+            {header:"Is Admin", key:"is_admin"},
+            {header:"Is Verified", key:"is_verified"}
+        ];
+
+        let counter = 1;
+        const userData = await User.find({is_admin:0});
+
+        userData.forEach((user)=>{
+            user.s_no = counter;
+            worksheet.addRow(user);
+            counter++;
+        });
+
+        worksheet.getRow(1).eachCell((cell)=>{
+            cell.font = {bold:true}
+        });
+
+        res.setHeader(
+            "Content-Type",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        );
+
+        res.setHeader("Content-Disposition",`attachment; filename=users.xlsx`);
+
+        return workbook.xlsx.write(res).then(()=>{
+            res.status(200);
+        })
+        
+    } catch (error) {
+        console.log(error.message);
+    }
+}
+
+//export user data into pdf
+const exportUsersPdf = async(req,res)=>{
+    try {
+
+        const users = await  User.find({is_admin:0});
+        const data = {
+            users:users
+        }
+
+        const filePathName = path.resolve(__dirname,'../views/admin/htmltopdf.ejs');
+        const htmlString = fs.readFileSync(filePathName).toString();
+        let options = {
+            format:'Letter'
+        }
+        const ejsData = ejs.render(htmlString,data);
+        pdf.create(ejsData,options).toFile('users.pdf',(err,response)=>{
+            if(err) console.log(err);
+            
+            const filePath = path.resolve(__dirname,'../users.pdf');
+            fs.readFile(filePath,(err,file)=>{
+                if(err){
+                    console.log(err);
+                    return res.status(500).send("Could not download file...")
+                }
+
+                res.setHeader('Content-Type','application/pdf');
+                res.setHeader('Content-Disposition','attachment;filename="users.pdf"');
+
+                res.send(file);
+            })
+
+        })
+    } catch (error) {
+        console.log(error.message);
+    }
+}
+
 module.exports = {
     loadLogin,
     verifyLogin,
@@ -350,5 +473,7 @@ module.exports = {
     addUser,
     editUserLoad,
     updateUsers,
-    deleteUser
+    deleteUser,
+    exportUsers,
+    exportUsersPdf
 }

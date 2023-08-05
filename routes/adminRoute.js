@@ -49,6 +49,8 @@ admin_route.post('/new-user',upload.single('image'),adminController.addUser);
 admin_route.get('/edit-user',auth.isLogin,adminController.editUserLoad);
 admin_route.post('/edit-user',adminController.updateUsers);
 admin_route.get('/delete-user',adminController.deleteUser);
+admin_route.get('/export-users',adminController.exportUsers);
+admin_route.get('/export-users-pdf',adminController.exportUsersPdf);
 
 admin_route.get('*', function(req,res){
     res.redirect('/admin')

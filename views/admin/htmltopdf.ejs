@@ -1,23 +1,12 @@
-<% include('../layouts/header.ejs') %>
-<h1>Dashboard</h1>
+<h1>Users List</h1>
 
-<a href="/admin/new-user">Add New User</a>
-<a href="/admin/export-users">Export Users</a>
-<a href="/admin/export-users-pdf">Export Users into Pdf</a>
-<br><br>
-<form>
-    <input type="text"  placeholder="Search User name, mobile, email" name="search">
-    <input type="submit" value="Search">
-</form>
-
-<table width="70%">
+<table width="100%">
     <tr>
         <th>Name</th>
         <th>Email</th>
         <th>Mobile No</th>
         <th>Image</th>
         <th>Verified</th>
-        <th>Action</th>
     </tr>
 
     
@@ -30,7 +19,7 @@
                     <td><%= users[i].name %></td>
                     <td><%= users[i].email %></td>
                     <td><%= users[i].mobile %></td>
-                    <td><img src="/userImages/<%= users[i].image %>" alt="<%= users[i].image %>" width="100px" height="100px"></td>
+                    <td><img src="http://localhost:3000//userImages/<%= users[i].image %>" alt="<%= users[i].image %>" width="100px" height="100px"></td>
                     <td><% 
                         if(users[i].is_verified == 0){
                             %>
@@ -43,10 +32,6 @@
                             <%
                         }
                         %></td>
-                        <td>
-                            <a href="/admin/edit-user?id=<%= users[i]._id %>">Edit</a>
-                            <a href="/admin/delete-user?id=<%= users[i]._id %>">Delete</a>
-                        </td>
                 </tr>
                 <%
             }    
@@ -60,14 +45,3 @@
     %>
 </table>
 <br><br>
-<% 
-    for(let j=1; j <= totalPages; j++){
-        %>
-        <a href="?page=<%= j %>"><%= j %></a>
-        <%
-    }
-%>
-<br><br>
-<a href="/admin/home">Go to Home</a>
-
-<% include('../layouts/footer.ejs') %>
